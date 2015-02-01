@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "_default": {
+            "link": "prototype school webapp"
+        }, 
+        "prototype school webapp": {
+            "applicationId": "wYgU4FKIOGisAlwEyNb4aMQzLgyZD9piEfBbZKoD", 
+            "masterKey": "tziKMu2nUdcpaAyUIko04uC4PFbFYGCoj6Dp4BwN"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.3.3"
+    }
+}

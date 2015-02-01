@@ -1,0 +1,92 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+
+  <title>My Parse App</title>
+  <meta name="description" content="My Parse App">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.3.3.min.js"></script>
+</head>
+
+<body>
+  
+  <div id="main">
+	<div id="LOL">
+		<li>
+			<a href="/newform.html">New Form</a>
+		</li>
+	</div>
+	<table id="formulierOverview"  style="width:100%;">
+		<tr id="defaultFormRow" style="width:100%;">
+			<td style="width:60%;">Er zijn nog geen formulieren aangemaakt!</td>
+		</tr>
+		<tr id="defaultFormRow" style="width:100%;display:none;">
+			<td style="width:60%;">[Naam]</td>
+			<td style="width:20%;">[Datum gemaakt]</td>
+			<td style="width:10%;"><form action="/updateform.html" method="POST"><button type="button" value="Aanpassen" id="ChangeFormulier"  value="">Aanpassen</button></form></td>
+			<td style="width:10%;"><button id="DeleteFormulier" onclick="deleteForm(this);">Verwijderen</button></td>
+		</tr>
+	</table>
+	
+	<script type="text/javascript">
+	Parse.initialize("wYgU4FKIOGisAlwEyNb4aMQzLgyZD9piEfBbZKoD", "IWPIAGEB4grDhdeXA5kBjVwb2OE9bhQt15YGJc5o");
+    
+	var formulieren = [];
+	var categories = [];
+	var beoordelingen = [];
+	
+	//Haal alle formulieren op;
+	var query = new Parse.Query(Parse.Object.Extend("formulier"));
+	query.find({
+	  success: function(results) {
+		formulieren = results;
+		for(int formulierIndex = 0; formulierIndex < results.length; formulierIndex++s){
+			generateFormRow(formlieren[formulierIndex], formulierIndex);
+		}
+	  },
+
+	  error: function(error) {
+		// error is an instance of Parse.Error.
+	  }
+	});
+	
+	function generateFormRow(formulier, index){
+		var form = document.getElementById("formulierOverview");
+		var noRowPresents = form.children[0];
+		var defaultFormRow = form.children[1];
+		
+		var newRow = defaultFormRow.cloneNode(true);
+		newRow.id = "formulier_"+index;
+		newRow.children[0] = formulier.get("formulierNaam");
+		newRow.children[1] = formulier.get("updatedAt");
+		newRow.children[2].children[0].children[0].value = formulier.id;
+		tableBody.insertBefore(c, tableBody.children[tableBody.children.length-1]);
+	}
+	
+	function deleteForm(button){
+		var formRow = button.parentNode.parentNode;
+		var formRowId = formRow.id.split("_")[1];
+		
+		formulieren[formRowId].destroy({
+		  success: function(myObject) {
+			formRow.remove();
+		  },
+		  error: function(myObject, error) {
+			// The delete failed.
+			// error is a Parse.Error with an error code and message.
+		  }
+		});
+	}
+	
+	function insertAfter( referenceNode, newNode )
+	{
+		referenceNode.parentNode.insertBefore( newNode, referenceNode.nextSibling );
+	}
+	
+  </script>
+</body>
+
+</html>

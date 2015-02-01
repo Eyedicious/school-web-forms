@@ -1,0 +1,190 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+
+  <title>My Parse App</title>
+  <meta name="description" content="My Parse App">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.3.3.min.js"></script>
+</head>
+
+<body>
+  
+  <div id="main">
+    <form id="form_formulier">
+		<table id="header" style="width:100%">
+			<thead>
+				<tr>				
+					<th colspan="8"><input style="width:100%;" type="text" name="formulierNaam" placeholder="Naam formulier"></th>
+				</tr>
+				<tr>				
+					<th  style="width:10%;">Evenement:</th>
+					<th style="text-align:center;" id="evenementNaam"><input type="text" name="evenementNaam" placeholder="Naam evenement" style="width:100%;height:100%;"></th>
+					<th style="width:5%;">Groepcijfer:</th>
+					<th style="width:5%;" id="groepCijfer"><input type="text" name="groepCijfer" placeholder="GC" style="width:50%;"></th>
+					<th style="width:20%;">Beoordelaars:</th>
+					<th style="width:30%;" id="beoordelaars">
+						<input type="text" name="docent1" placeholder="Docent 1" style="width:100%;">
+						<input type="text" name="docent2" placeholder="Docent 2" style="width:100%;">
+					</th>
+				</tr>
+			</thead>
+		</table>
+		<table id="studenten" style="width:100%;display:none;">
+			<thead>
+				<tr>				
+					<th style="width:5%;"></th>
+					<th style="width:35%;" >Naam</th>
+					<th style="width:10%;" colspan="2">Score</th>
+					<th style="width:5%;">+</th>
+					<th style="width:5%;">-</th>
+					<th style="width:5%;">Tot.</th>
+					<th style="width:10%;">Cijfer:</th>
+					<th style="width:25%;">Opmerkingen</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td style="width:5%;"></td>
+					<td style="width:35%;"></td>
+					<td style="width:5%;"></td>
+					<td style="width:5%;"></td>
+					<td style="width:5%;"></td>
+					<td style="width:5%;"></td>
+					<td style="width:5%;"></td>
+					<td style="width:10%;"></td>
+					<td style="width:25%;"></td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<table id="category_default" class="category" style="width:100%;display:none;">
+			<thead>
+				<tr>				
+					<th style="width:5%;"></th>
+					<th id="categorieNaam" style="text-align:center;width:35%;"><input type="text" name="categorieNaam" placeholder="Naam van de beoordelingsonderdeel" style="width:100%;"></th>
+					<th style="width:5%;"></th>
+					<th style="width:5%;"></th>
+					<th style="width:5%;"></th>
+					<th style="width:5%;"></th>		
+					<th style="text-align:center;width:40%">Opmerkingen</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+		<table id="beoordeling_default" class="category" style="width:100%;display:none;">
+			<tbody>
+			  <tr class="beoordeling">
+				<td style="width:5%;"></td>
+				<td style="width:35%;" id="stelling_naam"><textarea class="textarea" style="width:100%;" name="beoordelingNaam" placeholder="Beschrijving van een beoordeling" rows="2"></textarea></td> 
+				<td style="width:5%;">1<input type="checkbox" name="beoordeling[]" value="1" checked="yes"></td>
+				<td style="width:5%;">2<input type="checkbox" name="beoordeling[]" value="2" checked="yes"></td>
+				<td style="width:5%;">3<input type="checkbox" name="beoordeling[]" value="3" checked="yes"></td> 
+				<td style="width:5%;">4<input type="checkbox" name="beoordeling[]" value="4" checked="yes"></td>
+				<td style="width:40%;" id="opmerkingen"></td>
+			  </tr>
+			  <tr align="right">
+				<td colspan="1"><input type="button" id="addBeoordeling"  value="Beoordelingsonderdeel toevoegen" onclick="newBeoordeling(this);"/></tr>
+			  </tr>
+			</tbody>
+		</table>
+		<br><br>
+		<input id="addCategory" type="button" value="Beoordelingsonderdeel toevoegen" onclick="newCategory(this);" />		
+		
+		<input type="submit" id="submit" value="Opslaan">
+	</form>
+  </div>
+
+  <script type="text/javascript">
+	Parse.initialize("wYgU4FKIOGisAlwEyNb4aMQzLgyZD9piEfBbZKoD", "IWPIAGEB4grDhdeXA5kBjVwb2OE9bhQt15YGJc5o");
+    
+	var formulier = Parse.Object.extend("formulier");
+	var categories = [];
+	var beoordelingen = [];
+	
+	//Creër nieuwe categorie.
+	function newCategory(button){
+		button.disabled = true;
+		var category = Parse.Object.extend("category");
+		var Category = new category();
+		categories.push(Category);
+		Category.save(null, {
+		success: function(category) {
+				generateCategoryLayout();
+			},
+		error: function(category, error) {
+			alert('Failed to create new object, with error code: ' + error.message);
+			}
+		});
+		button.disabled = false;
+	}
+	
+	function newBeoordeling(button){
+		button.disabled = true;
+		var catIndex = button.parentNode.parentNode.parentNode.parentNode.id.split("_")[1];
+		
+		
+		var beoordeling = Parse.Object.extend("beoordeling");
+		var Beoordeling = new beoordeling();
+		beoordelingen.push(Beoordeling);
+		Beoordeling.save({category : categories[catIndex]}, {
+		success: function(beoordeling) {
+				generateBeoordelingLayout(button.parentNode.parentNode.parentNode);
+			},
+		error: function(beoordeling, error) {
+			alert('Failed to create new object, with error code: ' + error.message);
+			}
+		});
+		
+		button.disabled = false;
+	}
+	
+	function generateBeoordelingLayout(tableBody){
+		var c = document.getElementById("beoordeling_default").children[0].children[0].cloneNode(true);
+		c.children[0].innerHTML = beoordelingen.length;
+		tableBody.insertBefore(c, tableBody.children[tableBody.children.length-1]);
+		
+	}
+	
+	function generateCategoryLayout(){
+		var c = document.getElementById("category_default").cloneNode(true);
+		c.id = "category_"+categories.length;
+		c.removeAttribute("style");
+		c.style.width = "100%";
+		if(categories.length == 1){
+			insertAfter(document.getElementById("category_default"), c);
+		} else {
+			insertAfter(document.getElementById("category_"+(categories.length-1)), c);
+		}
+		
+		//Generate first beoordeling
+		var catIndex = c.id.split("_")[1];
+		
+		var beoordeling = Parse.Object.extend("beoordeling");
+		var Beoordeling = new beoordeling();
+		beoordelingen.push(Beoordeling);
+		Beoordeling.save({category : categories[catIndex]}, {
+		success: function(beoordeling) {
+				var cd = document.getElementById("beoordeling_default").children[0].cloneNode(true);
+				cd.children[0].children[0].innerHTML = beoordelingen.length;
+				c.insertBefore(cd, c.children[c.children.length-1]);
+			},
+		error: function(beoordeling, error) {
+			alert('Failed to create new object, with error code: ' + error.message);
+			}
+		});
+	}
+	
+	function insertAfter( referenceNode, newNode )
+	{
+		referenceNode.parentNode.insertBefore( newNode, referenceNode.nextSibling );
+	}
+	
+  </script>
+</body>
+
+</html>
